@@ -6,11 +6,10 @@ import lombok.Data;
 public class ImageCaption {
 	private String text;
 	private int pageNum;
-	private int imageHeight;
-	private int imageWidth;
-	
+	private ImageInfo imageInfo;
+
 	@Override
 	public String toString() {
-		return String.format("%s - Page %d - %dx%d", text, pageNum, imageHeight, imageWidth);
+		return String.format("%s - Page %d - %dx%d", text, pageNum, 0, 0);
 	}
 }
