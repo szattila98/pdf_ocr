@@ -12,11 +12,10 @@ import org.apache.pdfbox.text.PDFTextStripper;
 
 public class CaptionStripper {
 
-	private static final String PDF_PATH = "C:\\Users\\SzokeAttila\\Desktop\\PDF32000_2008.pdf";
 	private static final String REGEXP = "Figure\\s+(\\w+\\.\\d+|\\d+)\\s+(-|–).*";
 
 	public List<ImageCaption> strip(String path) throws IOException {
-		PDDocument doc = PDDocument.load(new File(PDF_PATH));
+		PDDocument doc = PDDocument.load(new File(path));
 		int numberOfPages = doc.getNumberOfPages();
 		PDFTextStripper stripper = new PDFTextStripper();
 		List<ImageCaption> imageCaptionList = new ArrayList<>();

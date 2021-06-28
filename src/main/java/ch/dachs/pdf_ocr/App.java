@@ -2,19 +2,24 @@ package ch.dachs.pdf_ocr;
 
 import java.io.IOException;
 
-import org.apache.log4j.BasicConfigurator;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 
-public class App {
+public class App {	
+	private static final Logger logger = LogManager.getLogger("App");
+	
 	public static void main(String[] args) {
-		System.out.println("PDF OCR \n=================================================");
+		if (args.length == 0) {
+			logger.error("Please specify a pdf path to continue with the extraction!");
+			return;
+		}
 		var stripper = new CaptionStripper();
 		try {
-			var captions = stripper.strip("testpath");
-			for (var caption : captions) {
-				System.out.println(caption.toString());
-			}
+			var captions = stripper.strip(args[0]);
+			new ResultWriter().write(captions);
+			logger.info("Image Captions extracted to a pdf file!");
 		} catch (IOException e) {
-			System.out.println("File cound not be opened/parsed!");
+			logger.error("File cound not be opened/parsed/written!");
 		}
 	}
 }
