@@ -28,7 +28,7 @@ public class CaptionStripper {
 			var textList = Arrays.asList(textOnPage.split("\n"));
 			var pageCaptionList = textList.stream().filter(text -> text.trim().matches(REGEXP)).map(text -> {
 				var imageCaption = new ImageCaption();
-				imageCaption.setText(text.trim());
+				imageCaption.setText(text);
 				imageCaption.setPageNum(currentPageNum);
 				return imageCaption;
 			}).collect(Collectors.toList());

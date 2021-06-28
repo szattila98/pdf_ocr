@@ -45,9 +45,10 @@ public class ImageInfoCollector extends PDFStreamEngine {
 		return pageImageInfoList;
 	}
 
-	// FIXME it finds images that aren't images, and does not find some images that
-	// are try another approach, like check if matched text has something above them
-	// and get info about that
+	// FIXME it finds images but it doesnt find non-image drawings and if there is
+	// multiple images above a figure it is hard to find which belong to which
+	// figure. Try to find another way, maybe check text coordinates and find images
+	// above those somehow
 	@Override
 	protected void processOperator(Operator operator, List<COSBase> operands) throws IOException {
 		String operation = operator.getName();

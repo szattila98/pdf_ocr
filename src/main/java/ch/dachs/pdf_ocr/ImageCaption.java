@@ -10,6 +10,6 @@ public class ImageCaption {
 
 	@Override
 	public String toString() {
-		return String.format("%s - Page %d - %dx%d", text, pageNum, 0, 0);
+		return String.format("%s - Page %d - %dx%d", text.trim(), pageNum, 0, 0);
 	}
 }
