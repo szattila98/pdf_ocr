@@ -20,12 +20,13 @@ import org.apache.pdfbox.pdmodel.graphics.PDXObject;
 import org.apache.pdfbox.pdmodel.graphics.form.PDFormXObject;
 import org.apache.pdfbox.pdmodel.graphics.image.PDImage;
 import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
+import org.apache.pdfbox.util.Matrix;
 
-public class ImageInfoCollector extends PDFStreamEngine {
+public class ImageInfoStripper extends PDFStreamEngine {
 
 	private List<ImageInfo> pageImageInfoList = new ArrayList<>();
 
-	public ImageInfoCollector() throws IOException {
+	public ImageInfoStripper() throws IOException {
 		// TODO check what is needed here
 		addOperator(new Concatenate());
 		addOperator(new DrawObject());
@@ -35,13 +36,8 @@ public class ImageInfoCollector extends PDFStreamEngine {
 		addOperator(new SetMatrix());
 	}
 
-	public List<ImageInfo> getDocumentImageInfo(PDDocument document) throws IOException {
-		var i = 1;
-		for (PDPage page : document.getPages()) {
-			System.out.println(i);
-			processPage(page);
-			i++;
-		}
+	public List<ImageInfo> getPageImageInfo(PDPage page) throws IOException {
+		processPage(page);
 		return pageImageInfoList;
 	}
 
@@ -59,13 +55,12 @@ public class ImageInfoCollector extends PDFStreamEngine {
 			// check if the object is an image object
 			if (xobject instanceof PDImage) {
 				PDImageXObject image = (PDImageXObject) xobject;
-				int currentImageWidth = image.getWidth();
-				int currentImageHeight = image.getHeight();
-//				if (currentImageHeight > 123 && currentImageWidth > 123) {
-				ImageInfo imageInfo = new ImageInfo(currentImageHeight, currentImageWidth);
-				System.out.println(imageInfo.toString());
-				pageImageInfoList.add(imageInfo);
-//				}
+				Matrix ctmNew = getGraphicsState().getCurrentTransformationMatrix();
+				int currentImageWidth = (int) ctmNew.getScalingFactorX();
+				int currentImageHeight = (int) ctmNew.getScalingFactorY();
+				if (currentImageWidth > 1 && currentImageHeight > 1) {
+					pageImageInfoList.add(new ImageInfo(currentImageWidth, currentImageHeight));
+				}
 			} else if (xobject instanceof PDFormXObject) {
 				// TODO maybe not needed
 				PDFormXObject form = (PDFormXObject) xobject;

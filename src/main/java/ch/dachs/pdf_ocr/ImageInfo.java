@@ -6,6 +6,6 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class ImageInfo {
-	private int imageHeight;
 	private int imageWidth;
+	private int imageHeight;
 }
