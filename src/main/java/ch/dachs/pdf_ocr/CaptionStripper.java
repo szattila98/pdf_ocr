@@ -44,13 +44,34 @@ public class CaptionStripper {
 					imageCaption.setPageNum(currentPageNum);
 				}
 			}
-			
+
 			var imageStripper = new ImageInfoStripper();
-		    var imageInfoList = imageStripper.getPageImageInfoList(doc.getPage(currentPageNum - 1));
+			var imageInfoList = imageStripper.getPageImageInfoList(doc.getPage(currentPageNum - 1));
 			
-		    System.out.println(currentPageNum + " : " + imageInfoList);
-		    
-		}		
+			// DEBUG
+			var page = 545;
+			if (currentPageNum == page) {
+				for (var imageInfo : imageInfoList) {
+					System.out.println(imageInfo.getPositionY());
+				}
+				var caption = documentImageCaptions.stream().filter(cap -> cap.getPageNum() == page).findFirst().get();
+				System.out.println("\n"+caption.getFirstLetterTextPosition().getY() +" - "+ caption.toString());
+			}
+			
+			if (!imageInfoList.isEmpty()) {
+				for (var imageCaption : documentImageCaptions) {
+					var imageInfoToRemoveList = new ArrayList<>();
+					for (var imageInfo : imageInfoList) {
+						if (imageCaption.getPageNum() == currentPageNum && imageInfo.getPositionY() < imageCaption.getFirstLetterTextPosition().getY()) {
+							imageCaption.getImageInfoList().add(imageInfo);
+							imageInfoToRemoveList.add(imageInfo);
+						}
+					}
+					imageInfoList.removeAll(imageInfoToRemoveList);
+				}
+			}
+			imageStripper.clearBuffer();
+		}
 		return documentImageCaptions;
 	}
 }

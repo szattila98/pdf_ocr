@@ -40,6 +40,10 @@ public class ImageInfoStripper extends PDFStreamEngine {
 		processPage(page);
 		return pageImageInfoList;
 	}
+	
+	public void clearBuffer() {
+		pageImageInfoList.clear();
+	}
 
 	// FIXME it finds images but it doesnt find non-image drawings and if there is
 	// multiple images above a figure it is hard to find which belong to which
