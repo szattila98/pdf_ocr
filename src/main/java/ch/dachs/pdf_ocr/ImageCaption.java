@@ -3,6 +3,8 @@ package ch.dachs.pdf_ocr;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.pdfbox.text.TextPosition;
+
 import lombok.Data;
 
 @Data
@@ -10,6 +12,7 @@ public class ImageCaption {
 	private String text;
 	private int pageNum;
 	private List<ImageInfo> imageInfoList = new ArrayList<>();
+	private TextPosition firstLetterTextPosition; // F is the letter
 
 	@Override
 	public String toString() {

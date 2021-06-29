@@ -19,7 +19,7 @@ public class ResultWriter {
 	// TODO clean up code and magic numbers
 	public void write(List<ImageCaption> imageCaptionList) throws IOException {
 		PDDocument document = new PDDocument();
-		List<List<ImageCaption>> lists = Lists.partition(imageCaptionList, 19);
+		List<List<ImageCaption>> lists = Lists.partition(imageCaptionList, 17);
 		for (List<ImageCaption> subList : lists) {
 			PDPage page = new PDPage();
 			document.addPage(page);

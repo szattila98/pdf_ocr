@@ -8,4 +8,6 @@ import lombok.Data;
 public class ImageInfo {
 	private int imageWidth;
 	private int imageHeight;
+	private float positionX;
+	private float positionY;
 }

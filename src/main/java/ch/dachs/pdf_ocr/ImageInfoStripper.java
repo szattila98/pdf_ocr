@@ -36,7 +36,7 @@ public class ImageInfoStripper extends PDFStreamEngine {
 		addOperator(new SetMatrix());
 	}
 
-	public List<ImageInfo> getPageImageInfo(PDPage page) throws IOException {
+	public List<ImageInfo> getPageImageInfoList(PDPage page) throws IOException {
 		processPage(page);
 		return pageImageInfoList;
 	}
@@ -54,12 +54,13 @@ public class ImageInfoStripper extends PDFStreamEngine {
 			PDXObject xobject = getResources().getXObject(objectName);
 			// check if the object is an image object
 			if (xobject instanceof PDImage) {
-				PDImageXObject image = (PDImageXObject) xobject;
+				// PDImageXObject image = (PDImageXObject) xobject;
 				Matrix ctmNew = getGraphicsState().getCurrentTransformationMatrix();
 				int currentImageWidth = (int) ctmNew.getScalingFactorX();
 				int currentImageHeight = (int) ctmNew.getScalingFactorY();
 				if (currentImageWidth > 1 && currentImageHeight > 1) {
-					pageImageInfoList.add(new ImageInfo(currentImageWidth, currentImageHeight));
+					pageImageInfoList.add(new ImageInfo(currentImageWidth, currentImageHeight, ctmNew.getTranslateX(),
+							ctmNew.getTranslateY()));
 				}
 			} else if (xobject instanceof PDFormXObject) {
 				// TODO maybe not needed
