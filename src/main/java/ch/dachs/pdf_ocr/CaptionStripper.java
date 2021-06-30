@@ -47,22 +47,22 @@ public class CaptionStripper {
 
 			var imageStripper = new ImageInfoStripper();
 			var imageInfoList = imageStripper.getPageImageInfoList(doc.getPage(currentPageNum - 1));
-			
+
 			// DEBUG
-			var page = 545;
+			var page = 743;
 			if (currentPageNum == page) {
 				for (var imageInfo : imageInfoList) {
-					System.out.println(imageInfo.getPositionY());
+					System.out.println(imageInfo.getImageWidth() + "x" + imageInfo.getImageHeight() + " : "
+							+ imageInfo.getPositionY());
 				}
-				var caption = documentImageCaptions.stream().filter(cap -> cap.getPageNum() == page).findFirst().get();
-				System.out.println("\n"+caption.getFirstLetterTextPosition().getY() +" - "+ caption.toString());
 			}
-			
+
 			if (!imageInfoList.isEmpty()) {
 				for (var imageCaption : documentImageCaptions) {
 					var imageInfoToRemoveList = new ArrayList<>();
 					for (var imageInfo : imageInfoList) {
-						if (imageCaption.getPageNum() == currentPageNum && imageInfo.getPositionY() < imageCaption.getFirstLetterTextPosition().getY()) {
+						if (imageCaption.getPageNum() == currentPageNum && imageInfo.getPositionY() > imageCaption
+								.getFirstLetterTextPosition().getTextMatrix().getTranslateY()) {
 							imageCaption.getImageInfoList().add(imageInfo);
 							imageInfoToRemoveList.add(imageInfo);
 						}
@@ -70,6 +70,15 @@ public class CaptionStripper {
 					imageInfoList.removeAll(imageInfoToRemoveList);
 				}
 			}
+
+			// DEBUG
+			if (currentPageNum == page) {
+				var caption = documentImageCaptions.stream().filter(cap -> cap.getPageNum() == page).skip(1).findFirst()
+						.get();
+				System.out.println("\n" + caption.getFirstLetterTextPosition().getTextMatrix().getTranslateY() + " - "
+						+ caption.toString());
+			}
+
 			imageStripper.clearBuffer();
 		}
 		return documentImageCaptions;

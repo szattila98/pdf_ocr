@@ -40,7 +40,7 @@ public class ImageInfoStripper extends PDFStreamEngine {
 		processPage(page);
 		return pageImageInfoList;
 	}
-	
+
 	public void clearBuffer() {
 		pageImageInfoList.clear();
 	}
@@ -60,11 +60,14 @@ public class ImageInfoStripper extends PDFStreamEngine {
 			if (xobject instanceof PDImage) {
 				// PDImageXObject image = (PDImageXObject) xobject;
 				Matrix ctmNew = getGraphicsState().getCurrentTransformationMatrix();
-				int currentImageWidth = (int) ctmNew.getScalingFactorX();
-				int currentImageHeight = (int) ctmNew.getScalingFactorY();
-				if (currentImageWidth > 1 && currentImageHeight > 1) {
-					pageImageInfoList.add(new ImageInfo(currentImageWidth, currentImageHeight, ctmNew.getTranslateX(),
-							ctmNew.getTranslateY()));
+				int imageWidth = (int) ctmNew.getScalingFactorX(); // displayed size in user space units
+					// image.getWidth(); // raw size in pixels
+				int imageHeight = (int) ctmNew.getScalingFactorY(); // displayed size in user space units
+					// image.getHeight(); // raw size in pixels
+				float xPosition = ctmNew.getTranslateX(); // positions in userSpaceUnits
+				float yPosition = ctmNew.getTranslateY(); // positions in userSpaceUnits
+				if (imageWidth > 1 && imageHeight > 1) {
+					pageImageInfoList.add(new ImageInfo(imageWidth, imageHeight, xPosition, yPosition));
 				}
 			} else if (xobject instanceof PDFormXObject) {
 				// TODO maybe not needed
