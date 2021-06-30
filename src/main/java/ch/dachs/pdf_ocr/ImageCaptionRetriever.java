@@ -11,12 +11,23 @@ import ch.dachs.pdf_ocr.core.ImageCaption;
 import ch.dachs.pdf_ocr.strippers.ImageInfoStripper;
 import ch.dachs.pdf_ocr.strippers.RegexpPDFTextStripper;
 
+/**
+ * Retrieves ImageCaptions.
+ * 
+ * @author SzokeAttila
+ */
 public class ImageCaptionRetriever {
 
 	private static final String REGEXP = "Figure\\s+(\\w+\\.\\d+|\\d+)\\s+–.*";
 
-	public List<ImageCaption> strip(String path) throws IOException {
-		PDDocument doc = PDDocument.load(new File(path));
+	/**
+	 * Retrieves captions from the given doc. Also couples them with images.
+	 * @param path the PDF doc path
+	 * @return the list of captions
+	 * @throws IOException thrown when PDF cannot be processed
+	 */
+	public List<ImageCaption> retrieve(String path) throws IOException {
+		var doc = PDDocument.load(new File(path));
 		int numberOfPages = doc.getNumberOfPages();
 		List<ImageCaption> documentImageCaptions = new ArrayList<>();
 		var textStripper = new RegexpPDFTextStripper(documentImageCaptions, REGEXP);
@@ -38,15 +49,6 @@ public class ImageCaptionRetriever {
 			var imageStripper = new ImageInfoStripper();
 			var imageInfoList = imageStripper.getPageImageInfoList(doc.getPage(currentPageNum - 1));
 
-			// TODO remove DEBUG
-			var page = 315;
-			if (currentPageNum == page) {
-				for (var imageInfo : imageInfoList) {
-					System.out.println(imageInfo.getImageWidth() + "x" + imageInfo.getImageHeight() + " : "
-							+ imageInfo.getPositionY());
-				}
-			}
-
 			// coupling images to captions
 			if (!imageInfoList.isEmpty()) {
 				for (var imageCaption : documentImageCaptions) {
@@ -60,14 +62,6 @@ public class ImageCaptionRetriever {
 					}
 					imageInfoList.removeAll(alreadyCoupledImageInfoList);
 				}
-			}
-
-			// TODO remove DEBUG
-			if (currentPageNum == page) {
-				var caption = documentImageCaptions.stream().filter(cap -> cap.getPageNum() == page)
-						./* skip(1). */findFirst().get();
-				System.out.println("\n" + caption.getFirstLetterTextPosition().getTextMatrix().getTranslateY() + " - "
-						+ caption.toString());
 			}
 		}
 		return documentImageCaptions;

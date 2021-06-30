@@ -22,10 +22,21 @@ import org.apache.pdfbox.util.Matrix;
 
 import ch.dachs.pdf_ocr.core.ImageInfo;
 
+/**
+ * Extension of PDFStreamEngine class. It finds real images (not drawings) and
+ * collects information about them.
+ * 
+ * @author SzokeAttila
+ */
 public class ImageInfoStripper extends PDFStreamEngine {
 
 	private List<ImageInfo> pageImageInfoList = new ArrayList<>();
 
+	/**
+	 * Basic constructor. Adds all needed operators.
+	 * 
+	 * @throws IOException operator adding exception
+	 */
 	public ImageInfoStripper() throws IOException {
 		addOperator(new Concatenate());
 		addOperator(new DrawObject());
@@ -35,15 +46,29 @@ public class ImageInfoStripper extends PDFStreamEngine {
 		addOperator(new SetMatrix());
 	}
 
+	/**
+	 * Gets every images' info from a page.
+	 * 
+	 * @param page the page
+	 * @return list of ImageInfo
+	 * @throws IOException thrown when page cannot be processed
+	 */
 	public List<ImageInfo> getPageImageInfoList(PDPage page) throws IOException {
 		processPage(page);
 		return pageImageInfoList;
 	}
 
+	/**
+	 * Clears list of ImageInfos.
+	 */
 	public void clearBuffer() {
 		pageImageInfoList.clear();
 	}
 
+	/**
+	 * ProcessPage calls this on every object. It checks whether the object is an
+	 * image and extracts ImageInfo, then puts it into the result list.
+	 */
 	@Override
 	protected void processOperator(Operator operator, List<COSBase> operands) throws IOException {
 		String operation = operator.getName();
@@ -55,13 +80,13 @@ public class ImageInfoStripper extends PDFStreamEngine {
 			if (xobject instanceof PDImage) {
 				// gather image info
 				// PDImageXObject image = (PDImageXObject) xobject;
-				Matrix ctmNew = getGraphicsState().getCurrentTransformationMatrix();
-				int imageWidth = (int) ctmNew.getScalingFactorX(); // displayed size in user space units
+				Matrix trMatrix = getGraphicsState().getCurrentTransformationMatrix();
+				int imageWidth = (int) trMatrix.getScalingFactorX(); // displayed size in user space units
 				// image.getWidth(); // raw size in pixels
-				int imageHeight = (int) ctmNew.getScalingFactorY(); // displayed size in user space units
+				int imageHeight = (int) trMatrix.getScalingFactorY(); // displayed size in user space units
 				// image.getHeight(); // raw size in pixels
-				float xPosition = ctmNew.getTranslateX(); // positions in userSpaceUnits
-				float yPosition = ctmNew.getTranslateY(); // positions in userSpaceUnits
+				float xPosition = trMatrix.getTranslateX(); // positions in userSpaceUnits
+				float yPosition = trMatrix.getTranslateY(); // positions in userSpaceUnits
 
 				if (imageWidth > 1 && imageHeight > 1) {
 					pageImageInfoList.add(new ImageInfo(imageWidth, imageHeight, xPosition, yPosition));

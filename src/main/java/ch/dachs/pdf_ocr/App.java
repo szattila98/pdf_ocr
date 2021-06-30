@@ -5,6 +5,11 @@ import java.io.IOException;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
+/**
+ * Main class of the application.
+ * 
+ * @author SzokeAttila
+ */
 public class App {
 
 	private static final String PDF_PATH_ERR_MSG = "Please specify a pdf path to continue with the extraction!";
@@ -20,7 +25,7 @@ public class App {
 		}
 		var stripper = new ImageCaptionRetriever();
 		try {
-			var captions = stripper.strip(args[0]);
+			var captions = stripper.retrieve(args[0]);
 			new ResultWriter().write(captions);
 			logger.info(SUCCESS_MSG);
 		} catch (IOException e) {

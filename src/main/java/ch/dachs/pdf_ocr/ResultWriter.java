@@ -15,17 +15,27 @@ import com.google.common.collect.Lists;
 
 import ch.dachs.pdf_ocr.core.ImageCaption;
 
+/**
+ * Writes String results into a PDF file.
+ * 
+ * @author SzokeAttila
+ */
 public class ResultWriter {
 
 	private static final int CAPTION_NO_ON_PAGE = 17;
 	
+	/**
+	 * Writes the list of captions to a PDF file.
+	 * @param imageCaptionList list of captions
+	 * @throws IOException thrown when PDF cannot be written
+	 */
 	public void write(List<ImageCaption> imageCaptionList) throws IOException {
-		PDDocument document = new PDDocument();
+		var document = new PDDocument();
 		// sublists for pages
 		List<List<ImageCaption>> lists = Lists.partition(imageCaptionList, CAPTION_NO_ON_PAGE);
 		for (List<ImageCaption> subList : lists) {
 			// new page
-			PDPage page = new PDPage();
+			var page = new PDPage();
 			document.addPage(page);
 			// formatting information
 			PDFont font = PDType1Font.TIMES_ROMAN;
@@ -39,7 +49,7 @@ public class ResultWriter {
 			// breaking long lines
 			var lines = breakStringToLines(subList, font, fontSize, width);
 			// writing to page
-			PDPageContentStream contentStream = new PDPageContentStream(document, page);
+			var contentStream = new PDPageContentStream(document, page);
 			contentStream.beginText();
 			contentStream.setFont(font, fontSize);
 			contentStream.newLineAtOffset(startX, startY);
@@ -55,6 +65,15 @@ public class ResultWriter {
 		document.close();
 	}
 
+	/**
+	 * Breaks a long String to lines so it does not clip out from a page.
+	 * @param imageCaptionList the list of captions
+	 * @param font the font style
+	 * @param fontSize the font size
+	 * @param width the width of writable space
+	 * @return broken list of lines to write
+	 * @throws IOException thrown when there is an error getting font width info
+	 */
 	private List<String> breakStringToLines(List<ImageCaption> imageCaptionList, PDFont font, float fontSize,
 			float width) throws IOException {
 		List<String> lines = new ArrayList<>();
