@@ -1,4 +1,4 @@
-package ch.dachs.pdf_ocr;
+package ch.dachs.pdf_ocr.core;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -3,53 +3,43 @@ package ch.dachs.pdf_ocr;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.text.PDFTextStripper;
-import org.apache.pdfbox.text.TextPosition;
 
-public class CaptionStripper {
+import ch.dachs.pdf_ocr.core.ImageCaption;
+import ch.dachs.pdf_ocr.strippers.ImageInfoStripper;
+import ch.dachs.pdf_ocr.strippers.RegexpPDFTextStripper;
+
+public class ImageCaptionRetriever {
 
 	private static final String REGEXP = "Figure\\s+(\\w+\\.\\d+|\\d+)\\s+–.*";
 
 	public List<ImageCaption> strip(String path) throws IOException {
 		PDDocument doc = PDDocument.load(new File(path));
 		int numberOfPages = doc.getNumberOfPages();
-
 		List<ImageCaption> documentImageCaptions = new ArrayList<>();
-		var captionStripper = new PDFTextStripper() {
-			@Override
-			protected void writeString(String text, List<TextPosition> textPositions) throws IOException {
-				var trimmed = text.trim();
-				if (trimmed.matches(REGEXP)) {
-					var imageCaption = new ImageCaption();
-					imageCaption.setText(trimmed);
-					imageCaption.setFirstLetterTextPosition(textPositions.get(0));
-					documentImageCaptions.add(imageCaption);
-				}
-				super.writeString(text, textPositions);
-			}
-
-		};
+		var textStripper = new RegexpPDFTextStripper(documentImageCaptions, REGEXP);
 
 		for (var currentPageNum = 1; currentPageNum < numberOfPages + 1; currentPageNum++) {
-			captionStripper.setStartPage(currentPageNum);
-			captionStripper.setEndPage(currentPageNum);
-			captionStripper.getText(doc);
+			// stripping text from page
+			textStripper.setStartPage(currentPageNum);
+			textStripper.setEndPage(currentPageNum);
+			textStripper.getText(doc);
+
+			// setting page number for captions
 			for (var imageCaption : documentImageCaptions) {
 				if (imageCaption.getPageNum() == 0) {
 					imageCaption.setPageNum(currentPageNum);
 				}
 			}
 
+			// stripping images from page
 			var imageStripper = new ImageInfoStripper();
 			var imageInfoList = imageStripper.getPageImageInfoList(doc.getPage(currentPageNum - 1));
 
-			// DEBUG
-			var page = 743;
+			// TODO remove DEBUG
+			var page = 315;
 			if (currentPageNum == page) {
 				for (var imageInfo : imageInfoList) {
 					System.out.println(imageInfo.getImageWidth() + "x" + imageInfo.getImageHeight() + " : "
@@ -57,29 +47,28 @@ public class CaptionStripper {
 				}
 			}
 
+			// coupling images to captions
 			if (!imageInfoList.isEmpty()) {
 				for (var imageCaption : documentImageCaptions) {
-					var imageInfoToRemoveList = new ArrayList<>();
+					var alreadyCoupledImageInfoList = new ArrayList<>();
 					for (var imageInfo : imageInfoList) {
 						if (imageCaption.getPageNum() == currentPageNum && imageInfo.getPositionY() > imageCaption
 								.getFirstLetterTextPosition().getTextMatrix().getTranslateY()) {
 							imageCaption.getImageInfoList().add(imageInfo);
-							imageInfoToRemoveList.add(imageInfo);
+							alreadyCoupledImageInfoList.add(imageInfo);
 						}
 					}
-					imageInfoList.removeAll(imageInfoToRemoveList);
+					imageInfoList.removeAll(alreadyCoupledImageInfoList);
 				}
 			}
 
-			// DEBUG
+			// TODO remove DEBUG
 			if (currentPageNum == page) {
-				var caption = documentImageCaptions.stream().filter(cap -> cap.getPageNum() == page).skip(1).findFirst()
-						.get();
+				var caption = documentImageCaptions.stream().filter(cap -> cap.getPageNum() == page)
+						./* skip(1). */findFirst().get();
 				System.out.println("\n" + caption.getFirstLetterTextPosition().getTextMatrix().getTranslateY() + " - "
 						+ caption.toString());
 			}
-
-			imageStripper.clearBuffer();
 		}
 		return documentImageCaptions;
 	}

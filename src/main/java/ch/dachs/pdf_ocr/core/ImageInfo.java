@@ -1,4 +1,4 @@
-package ch.dachs.pdf_ocr;
+package ch.dachs.pdf_ocr.core;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

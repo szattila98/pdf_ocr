@@ -1,4 +1,4 @@
-package ch.dachs.pdf_ocr;
+package ch.dachs.pdf_ocr.strippers;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -14,20 +14,19 @@ import org.apache.pdfbox.contentstream.operator.state.SetGraphicsStateParameters
 import org.apache.pdfbox.contentstream.operator.state.SetMatrix;
 import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.cos.COSName;
-import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.graphics.PDXObject;
 import org.apache.pdfbox.pdmodel.graphics.form.PDFormXObject;
 import org.apache.pdfbox.pdmodel.graphics.image.PDImage;
-import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
 import org.apache.pdfbox.util.Matrix;
+
+import ch.dachs.pdf_ocr.core.ImageInfo;
 
 public class ImageInfoStripper extends PDFStreamEngine {
 
 	private List<ImageInfo> pageImageInfoList = new ArrayList<>();
 
 	public ImageInfoStripper() throws IOException {
-		// TODO check what is needed here
 		addOperator(new Concatenate());
 		addOperator(new DrawObject());
 		addOperator(new SetGraphicsStateParameters());
@@ -45,10 +44,6 @@ public class ImageInfoStripper extends PDFStreamEngine {
 		pageImageInfoList.clear();
 	}
 
-	// FIXME it finds images but it doesnt find non-image drawings and if there is
-	// multiple images above a figure it is hard to find which belong to which
-	// figure. Try to find another way, maybe check text coordinates and find images
-	// above those somehow
 	@Override
 	protected void processOperator(Operator operator, List<COSBase> operands) throws IOException {
 		String operation = operator.getName();
@@ -58,19 +53,20 @@ public class ImageInfoStripper extends PDFStreamEngine {
 			PDXObject xobject = getResources().getXObject(objectName);
 			// check if the object is an image object
 			if (xobject instanceof PDImage) {
+				// gather image info
 				// PDImageXObject image = (PDImageXObject) xobject;
 				Matrix ctmNew = getGraphicsState().getCurrentTransformationMatrix();
 				int imageWidth = (int) ctmNew.getScalingFactorX(); // displayed size in user space units
-					// image.getWidth(); // raw size in pixels
+				// image.getWidth(); // raw size in pixels
 				int imageHeight = (int) ctmNew.getScalingFactorY(); // displayed size in user space units
-					// image.getHeight(); // raw size in pixels
+				// image.getHeight(); // raw size in pixels
 				float xPosition = ctmNew.getTranslateX(); // positions in userSpaceUnits
 				float yPosition = ctmNew.getTranslateY(); // positions in userSpaceUnits
+
 				if (imageWidth > 1 && imageHeight > 1) {
 					pageImageInfoList.add(new ImageInfo(imageWidth, imageHeight, xPosition, yPosition));
 				}
 			} else if (xobject instanceof PDFormXObject) {
-				// TODO maybe not needed
 				PDFormXObject form = (PDFormXObject) xobject;
 				showForm(form);
 			}
