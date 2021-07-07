@@ -38,13 +38,6 @@ public class ImageCaptionRetriever {
 			textStripper.setEndPage(currentPageNum);
 			textStripper.getText(doc);
 
-			// setting page number for captions
-			for (var imageCaption : documentImageCaptions) {
-				if (imageCaption.getPageNum() == 0) {
-					imageCaption.setPageNum(currentPageNum);
-				}
-			}
-
 			// stripping images from page
 			var imageStripper = new ImageInfoStripper();
 			var imageInfoList = imageStripper.getPageImageInfoList(doc.getPage(currentPageNum - 1));

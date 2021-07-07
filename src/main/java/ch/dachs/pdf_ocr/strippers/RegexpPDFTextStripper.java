@@ -18,6 +18,8 @@ public class RegexpPDFTextStripper extends PDFTextStripper {
 
 	private final String regexp;
 	private final List<ImageCaption> documentImageCaptions;
+	private static final int MIN_DIFFERENCE = 10;
+	private static final int MAX_DIFFERENCE = 12;
 
 	/**
 	 * Basic constructor. Sets the result list and the regexp.
@@ -42,7 +44,17 @@ public class RegexpPDFTextStripper extends PDFTextStripper {
 			var imageCaption = new ImageCaption();
 			imageCaption.setText(trimmed);
 			imageCaption.setFirstLetterTextPosition(textPositions.get(0));
+			imageCaption.setPageNum(this.getCurrentPageNo());
 			documentImageCaptions.add(imageCaption);
+		} else if (!documentImageCaptions.isEmpty()) {
+			// Check if there is another line for the last caption and concat the line to the caption text
+			var lastCaption = documentImageCaptions.get(documentImageCaptions.size() - 1);
+			var lastCaptionYPos = lastCaption.getFirstLetterTextPosition().getTextMatrix().getTranslateY();
+			var currentLineYPos = textPositions.get(0).getTextMatrix().getTranslateY();
+			var yDifference = lastCaptionYPos - currentLineYPos;
+			if (lastCaption.getPageNum() == this.getCurrentPageNo() && yDifference < MAX_DIFFERENCE && yDifference > MIN_DIFFERENCE) {
+				lastCaption.concatText(trimmed);
+			}
 		}
 		super.writeString(text, textPositions);
 	}

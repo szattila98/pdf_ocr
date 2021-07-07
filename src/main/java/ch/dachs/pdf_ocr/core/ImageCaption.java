@@ -20,6 +20,16 @@ public class ImageCaption {
 	private TextPosition firstLetterTextPosition; // F is the letter
 
 	/**
+	 * Concats a string to the caption text. Used when one caption is multiple line
+	 * long.
+	 * 
+	 * @param text the string to concat
+	 */
+	public void concatText(String text) {
+		this.text = this.text.concat(text);
+	}
+
+	/**
 	 * Generates the String representation of the object. If images are present,
 	 * also prints their dimensions, if not prints a message.
 	 * 

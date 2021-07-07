@@ -79,12 +79,9 @@ public class ImageInfoStripper extends PDFStreamEngine {
 			// check if the object is an image object
 			if (xobject instanceof PDImage) {
 				// gather image info
-				// PDImageXObject image = (PDImageXObject) xobject;
 				Matrix trMatrix = getGraphicsState().getCurrentTransformationMatrix();
 				int imageWidth = (int) trMatrix.getScalingFactorX(); // displayed size in user space units
-				// image.getWidth(); // raw size in pixels
 				int imageHeight = (int) trMatrix.getScalingFactorY(); // displayed size in user space units
-				// image.getHeight(); // raw size in pixels
 				float xPosition = trMatrix.getTranslateX(); // positions in userSpaceUnits
 				float yPosition = trMatrix.getTranslateY(); // positions in userSpaceUnits
 
