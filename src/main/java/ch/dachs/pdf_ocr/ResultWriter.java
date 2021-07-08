@@ -23,54 +23,56 @@ import ch.dachs.pdf_ocr.core.ImageCaption;
 public class ResultWriter {
 
 	private static final int CAPTION_NO_ON_PAGE = 17;
-	
+
 	/**
 	 * Writes the list of captions to a PDF file.
+	 * 
 	 * @param imageCaptionList list of captions
 	 * @throws IOException thrown when PDF cannot be written
 	 */
 	public void write(List<ImageCaption> imageCaptionList) throws IOException {
-		var document = new PDDocument();
-		// sublists for pages
-		List<List<ImageCaption>> lists = Lists.partition(imageCaptionList, CAPTION_NO_ON_PAGE);
-		for (List<ImageCaption> subList : lists) {
-			// new page
-			var page = new PDPage();
-			document.addPage(page);
-			// formatting information
-			PDFont font = PDType1Font.TIMES_ROMAN;
-			float fontSize = 12;
-			float leading = 1.6f * fontSize;
-			PDRectangle mediabox = page.getMediaBox();
-			float margin = 72;
-			float width = mediabox.getWidth() - 2 * margin;
-			float startX = mediabox.getLowerLeftX() + margin;
-			float startY = mediabox.getUpperRightY() - margin;
-			// breaking long lines
-			var lines = breakStringToLines(subList, font, fontSize, width);
-			// writing to page
-			var contentStream = new PDPageContentStream(document, page);
-			contentStream.beginText();
-			contentStream.setFont(font, fontSize);
-			contentStream.newLineAtOffset(startX, startY);
-			for (var line : lines) {
-				contentStream.showText(line);
-				contentStream.newLineAtOffset(0, -leading);
+		try (var document = new PDDocument()) {
+			// sublists for pages
+			List<List<ImageCaption>> lists = Lists.partition(imageCaptionList, CAPTION_NO_ON_PAGE);
+			for (List<ImageCaption> subList : lists) {
+				// new page
+				var page = new PDPage();
+				document.addPage(page);
+				// formatting information
+				PDFont font = PDType1Font.TIMES_ROMAN;
+				float fontSize = 12;
+				float leading = 1.6f * fontSize;
+				PDRectangle mediabox = page.getMediaBox();
+				float margin = 72;
+				float width = mediabox.getWidth() - 2 * margin;
+				float startX = mediabox.getLowerLeftX() + margin;
+				float startY = mediabox.getUpperRightY() - margin;
+				// breaking long lines
+				var lines = breakStringToLines(subList, font, fontSize, width);
+				// writing to page
+				var contentStream = new PDPageContentStream(document, page);
+				contentStream.beginText();
+				contentStream.setFont(font, fontSize);
+				contentStream.newLineAtOffset(startX, startY);
+				for (var line : lines) {
+					contentStream.showText(line);
+					contentStream.newLineAtOffset(0, -leading);
+				}
+				contentStream.endText();
+				contentStream.close();
 			}
-			contentStream.endText();
-			contentStream.close();
+			// saving doc
+			document.save("pdf_ocr_results.pdf");
 		}
-		// saving doc
-		document.save("pdf_ocr_results.pdf");
-		document.close();
 	}
 
 	/**
 	 * Breaks a long String to lines so it does not clip out from a page.
+	 * 
 	 * @param imageCaptionList the list of captions
-	 * @param font the font style
-	 * @param fontSize the font size
-	 * @param width the width of writable space
+	 * @param font             the font style
+	 * @param fontSize         the font size
+	 * @param width            the width of writable space
 	 * @return broken list of lines to write
 	 * @throws IOException thrown when there is an error getting font width info
 	 */

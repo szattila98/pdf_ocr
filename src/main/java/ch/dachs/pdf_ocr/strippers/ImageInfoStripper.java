@@ -59,13 +59,6 @@ public class ImageInfoStripper extends PDFStreamEngine {
 	}
 
 	/**
-	 * Clears list of ImageInfos.
-	 */
-	public void clearBuffer() {
-		pageImageInfoList.clear();
-	}
-
-	/**
 	 * ProcessPage calls this on every object. It checks whether the object is an
 	 * image and extracts ImageInfo, then puts it into the result list.
 	 */

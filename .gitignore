@@ -3,3 +3,4 @@
 .settings/
 target/
 pdf_ocr_results.pdf
+logs/

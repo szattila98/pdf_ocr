@@ -2,6 +2,7 @@ package ch.dachs.pdf_ocr.core;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.apache.pdfbox.text.TextPosition;
 
@@ -14,6 +15,13 @@ import lombok.Data;
  */
 @Data
 public class ImageCaption {
+
+	private static final String CAPTION_FORMAT_NO_IMAGE = "%s - Page %d - no image, only drawn figure";
+	private static final String CAPTION_FORMAT_WITH_IMAGE = "%s - Page %d - %s";
+	private static final String GROUPED_IMAGE_SIZE_FORMAT = "%d pictures with size of %s";
+	private static final String IMAGE_SIZE_FORMAT = "%dx%d";
+	private static final String SEPARATOR = ", ";
+
 	private String text;
 	private int pageNum;
 	private List<ImageInfo> imageInfoList = new ArrayList<>();
@@ -38,14 +46,25 @@ public class ImageCaption {
 	@Override
 	public String toString() {
 		if (imageInfoList.isEmpty()) {
-			return String.format(
-					"%s - Page %d - no real image detected, most probably caption belongs to a drawn figure",
-					text.trim(), pageNum);
+			return String.format(CAPTION_FORMAT_NO_IMAGE, text.trim(), pageNum);
 		}
-		var sb = new StringBuilder();
-		for (var imageInfo : imageInfoList) {
-			sb.append(String.format(" %dx%d ", imageInfo.getImageWidth(), imageInfo.getImageHeight()));
-		}
-		return String.format("%s - Page %d -%s", text.trim(), pageNum, sb.toString());
+		var imageStr = separateByCommas(groupBySizes(imageInfoList));
+		return String.format(CAPTION_FORMAT_WITH_IMAGE, text.trim(), pageNum, imageStr);
+	}
+
+	private List<String> groupBySizes(List<ImageInfo> list) {
+		return list.stream()
+				.collect(Collectors.groupingBy(
+						image -> String.format(IMAGE_SIZE_FORMAT, image.getImageWidth(), image.getImageHeight())))
+				.entrySet().stream().map(entry -> {
+					if (entry.getValue().size() == 1) {
+						return entry.getKey();
+					}
+					return String.format(GROUPED_IMAGE_SIZE_FORMAT, entry.getValue().size(), entry.getKey());
+				}).sorted((x, y) -> Integer.compare(y.length(), x.length())).collect(Collectors.toList());
+	}
+	
+	private String separateByCommas(List<String> list) {
+		return list.stream().collect(Collectors.joining(SEPARATOR));
 	}
 }
