@@ -22,7 +22,10 @@ import ch.dachs.pdf_ocr.core.ImageCaption;
  */
 public class ResultWriter {
 
-	private static final int CAPTION_NO_ON_PAGE = 17;
+	private static final PDFont FONT_TYPE = PDType1Font.TIMES_ROMAN;
+	private static final float FONT_SIZE = 12;
+	private static final float LEADING = 1.6f * FONT_SIZE;
+	private static final float MARGIN = 72;
 
 	/**
 	 * Writes the list of captions to a PDF file.
@@ -32,34 +35,32 @@ public class ResultWriter {
 	 */
 	public void write(List<ImageCaption> imageCaptionList) throws IOException {
 		try (var document = new PDDocument()) {
-			// sublists for pages
-			List<List<ImageCaption>> lists = Lists.partition(imageCaptionList, CAPTION_NO_ON_PAGE);
-			for (List<ImageCaption> subList : lists) {
+			// page information				
+			PDRectangle mediabox = new PDPage().getMediaBox();
+			int allowedWidth = (int) (mediabox.getWidth() - 2 * MARGIN);
+			float startX = mediabox.getLowerLeftX() + MARGIN;
+			float startY = mediabox.getUpperRightY() - MARGIN;
+			// breaking long lines
+			var lines = breakStringToLines(imageCaptionList, allowedWidth);
+			// sublists for pages based on lines
+			var lineNoOnPage = (int) (startY / LEADING) - 2;
+			List<List<String>> lineLists = Lists.partition(lines, lineNoOnPage);
+			// writing to doc
+			for (var subList : lineLists) {
 				// new page
 				var page = new PDPage();
-				document.addPage(page);
-				// formatting information
-				PDFont font = PDType1Font.TIMES_ROMAN;
-				float fontSize = 12;
-				float leading = 1.6f * fontSize;
-				PDRectangle mediabox = page.getMediaBox();
-				float margin = 72;
-				float width = mediabox.getWidth() - 2 * margin;
-				float startX = mediabox.getLowerLeftX() + margin;
-				float startY = mediabox.getUpperRightY() - margin;
-				// breaking long lines
-				var lines = breakStringToLines(subList, font, fontSize, width);
+				document.addPage(page);				
 				// writing to page
-				var contentStream = new PDPageContentStream(document, page);
-				contentStream.beginText();
-				contentStream.setFont(font, fontSize);
-				contentStream.newLineAtOffset(startX, startY);
-				for (var line : lines) {
-					contentStream.showText(line);
-					contentStream.newLineAtOffset(0, -leading);
+				try (var contentStream = new PDPageContentStream(document, page)) {
+					contentStream.beginText();
+					contentStream.setFont(FONT_TYPE, FONT_SIZE);
+					contentStream.newLineAtOffset(startX, startY);
+					for (var line : subList) {
+						contentStream.showText(line);
+						contentStream.newLineAtOffset(0, -LEADING);
+					}
+					contentStream.endText();
 				}
-				contentStream.endText();
-				contentStream.close();
 			}
 			// saving doc
 			document.save("pdf_ocr_results.pdf");
@@ -70,39 +71,29 @@ public class ResultWriter {
 	 * Breaks a long String to lines so it does not clip out from a page.
 	 * 
 	 * @param imageCaptionList the list of captions
-	 * @param font             the font style
-	 * @param fontSize         the font size
-	 * @param width            the width of writable space
+	 * @param allowedWidth            the width of writable space
 	 * @return broken list of lines to write
 	 * @throws IOException thrown when there is an error getting font width info
 	 */
-	private List<String> breakStringToLines(List<ImageCaption> imageCaptionList, PDFont font, float fontSize,
-			float width) throws IOException {
+	private List<String> breakStringToLines(List<ImageCaption> imageCaptionList, int allowedWidth) throws IOException {
 		List<String> lines = new ArrayList<>();
-		int lastSpace = -1;
 		for (var imageCaption : imageCaptionList) {
 			var text = imageCaption.toString();
-			while (text.length() > 0) {
-				int spaceIndex = text.indexOf(' ', lastSpace + 1);
-				if (spaceIndex < 0)
-					spaceIndex = text.length();
-				var subString = text.substring(0, spaceIndex);
-				float size = fontSize * font.getStringWidth(subString) / 1000;
-				if (size > width) {
-					if (lastSpace < 0)
-						lastSpace = spaceIndex;
-					subString = text.substring(0, lastSpace);
-					lines.add(subString);
-					text = text.substring(lastSpace).trim();
-					lastSpace = -1;
-				} else if (spaceIndex == text.length()) {
-					lines.add(text);
-					text = "";
-				} else {
-					lastSpace = spaceIndex;
-				}
-			}
-
+			String[] words = text.split(" ");
+			var line = new StringBuilder();
+		    for(String word : words) {
+		        if(!line.isEmpty()) {
+		            line.append(" ");
+		        }
+		        int size = (int) (FONT_SIZE * FONT_TYPE.getStringWidth(line + word) / 1000);
+		        if(size > allowedWidth) {
+		            lines.add(line.toString());
+		            line.replace(0, line.length(), word);
+		        } else {
+		        	line.append(word);
+		        }
+		    }
+		    lines.add(line.toString());
 		}
 		return lines;
 	}
