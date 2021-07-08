@@ -16,10 +16,11 @@ import ch.dachs.pdf_ocr.core.ImageCaption;
  */
 public class RegexpPDFTextStripper extends PDFTextStripper {
 
-	private final String regexp;
-	private final List<ImageCaption> documentImageCaptions;
 	private static final int MIN_DIFFERENCE = 10;
 	private static final int MAX_DIFFERENCE = 12;
+	
+	private final String regexp;
+	private final List<ImageCaption> imageCaptions;
 
 	/**
 	 * Basic constructor. Sets the result list and the regexp.
@@ -29,7 +30,7 @@ public class RegexpPDFTextStripper extends PDFTextStripper {
 	 * @throws IOException thrown when pdf cannot be processed
 	 */
 	public RegexpPDFTextStripper(List<ImageCaption> documentImageCaptions, String regexp) throws IOException {
-		this.documentImageCaptions = documentImageCaptions;
+		this.imageCaptions = documentImageCaptions;
 		this.regexp = regexp;
 	}
 
@@ -41,14 +42,11 @@ public class RegexpPDFTextStripper extends PDFTextStripper {
 	public void writeString(String text, List<TextPosition> textPositions) throws IOException {
 		var trimmed = text.trim();
 		if (trimmed.matches(regexp)) {
-			var imageCaption = new ImageCaption();
-			imageCaption.setText(trimmed);
-			imageCaption.setFirstLetterTextPosition(textPositions.get(0));
-			imageCaption.setPageNum(this.getCurrentPageNo());
-			documentImageCaptions.add(imageCaption);
-		} else if (!documentImageCaptions.isEmpty()) {
+			var imageCaption = new ImageCaption(trimmed, this.getCurrentPageNo(), textPositions.get(0));
+			imageCaptions.add(imageCaption);
+		} else if (!imageCaptions.isEmpty()) {
 			// Check if there is another line for the last caption and concat the line to the caption text
-			var lastCaption = documentImageCaptions.get(documentImageCaptions.size() - 1);
+			var lastCaption = imageCaptions.get(imageCaptions.size() - 1);
 			var lastCaptionYPos = lastCaption.getFirstLetterTextPosition().getTextMatrix().getTranslateY();
 			var currentLineYPos = textPositions.get(0).getTextMatrix().getTranslateY();
 			var yDifference = lastCaptionYPos - currentLineYPos;

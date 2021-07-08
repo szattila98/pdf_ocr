@@ -27,6 +27,12 @@ public class ImageCaption {
 	private List<ImageInfo> imageInfoList = new ArrayList<>();
 	private TextPosition firstLetterTextPosition; // F is the letter
 
+	public ImageCaption(String text, int pageNum, TextPosition firstLetterTextPosition) {
+		this.text = text;
+		this.pageNum = pageNum;
+		this.firstLetterTextPosition = firstLetterTextPosition;
+	}
+	
 	/**
 	 * Concats a string to the caption text. Used when one caption is multiple line
 	 * long.
