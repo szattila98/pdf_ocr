@@ -43,7 +43,7 @@ public class ResultWriter {
 			// breaking long lines
 			var lines = breakStringToLines(imageCaptionList, allowedWidth);
 			// sublists for pages based on lines
-			var lineNoOnPage = (int) (startY / LEADING) - 2;
+			var lineNoOnPage = (int) ((mediabox.getHeight() - 1.7 * MARGIN) / LEADING);
 			List<List<String>> lineLists = Lists.partition(lines, lineNoOnPage);
 			// writing to doc
 			for (var subList : lineLists) {

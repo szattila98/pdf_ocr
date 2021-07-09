@@ -60,7 +60,7 @@ public class ImageCaptionRetriever {
 				}
 				documentImageCaptions.add(pageImageCaptions);
 			}
-			return documentImageCaptions.stream().flatMap(caption -> caption.stream()).collect(Collectors.toList());
+			return documentImageCaptions.stream().flatMap(List::stream).collect(Collectors.toList());
 		}
 	}
 }

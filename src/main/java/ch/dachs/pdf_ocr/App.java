@@ -2,7 +2,7 @@ package ch.dachs.pdf_ocr;
 
 import java.io.IOException;
 
-import org.apache.commons.logging.Log; 
+import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 /**

@@ -18,7 +18,6 @@ import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.graphics.PDXObject;
 import org.apache.pdfbox.pdmodel.graphics.form.PDFormXObject;
 import org.apache.pdfbox.pdmodel.graphics.image.PDImage;
-import org.apache.pdfbox.util.Matrix;
 
 import ch.dachs.pdf_ocr.core.ImageInfo;
 
@@ -72,7 +71,7 @@ public class ImageInfoStripper extends PDFStreamEngine {
 			// check if the object is an image object
 			if (xobject instanceof PDImage) {
 				// gather image info
-				Matrix trMatrix = getGraphicsState().getCurrentTransformationMatrix();
+				var trMatrix = getGraphicsState().getCurrentTransformationMatrix();
 				int imageWidth = (int) trMatrix.getScalingFactorX(); // displayed size in user space units
 				int imageHeight = (int) trMatrix.getScalingFactorY(); // displayed size in user space units
 				float xPosition = trMatrix.getTranslateX(); // positions in userSpaceUnits
