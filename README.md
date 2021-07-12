@@ -1,5 +1,5 @@
 # pdf_ocr
-A pdf text reader software that collects image caption info from a pdf file.
+A pdf text extractor software that collects image captions.
 
 ## Usage
 
@@ -9,7 +9,7 @@ A pdf text reader software that collects image caption info from a pdf file.
 
 - Run jar with dependencies in target dir. Alternatively run pre-packaged jar in dist dir.
 
-`java -jar pdf_ocr-0.0.1-SNAPSHOT-jar-with-dependencies PDF32000_2008.pdf`
+`java -jar pdf_ocr_figures-0.0.2-SNAPSHOT-jar-with-dependencies.jar PDF32000_2008.pdf`
 
 - The result is a PDF doc with the caption info.
 

@@ -6,7 +6,7 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>ch.dachs</groupId>
-	<artifactId>pdf_ocr</artifactId>
+	<artifactId>pdf_ocr_figures</artifactId>
 	<version>0.0.2-SNAPSHOT</version>
 
 	<name>pdf_ocr</name>
@@ -73,7 +73,7 @@
 				<configuration>
 					<archive>
 						<manifest>
-							<mainClass>ch.dachs.pdf_ocr.App</mainClass>
+							<mainClass>ch.dachs.pdf_ocr_figures.App</mainClass>
 						</manifest>
 					</archive>
 					<descriptorRefs>
